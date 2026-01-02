@@ -1,15 +1,21 @@
 <script setup>
+import { ref } from 'vue'
 import { useSettingsStore } from '@/stores/settings'
 import { useNotificationsStore } from '@/stores/notifications'
+import { useStatisticsStore } from '@/stores/statistics'
+import Modal from './Modal.vue'
+import ConfirmModal from './ConfirmModal.vue'
 
-const props = defineProps({
+defineProps({
   open: Boolean
 })
 
-const emit = defineEmits(['update:open'])
+defineEmits(['update:open'])
 
 const settingsStore = useSettingsStore()
 const notificationsStore = useNotificationsStore()
+const statisticsStore = useStatisticsStore()
+const showResetConfirm = ref(false)
 
 async function requestNotificationPermission() {
   await notificationsStore.requestPermission()
@@ -18,32 +24,18 @@ async function requestNotificationPermission() {
   }
 }
 
-function close() {
-  emit('update:open', false)
+function handleResetStreak() {
+  statisticsStore.resetStreak()
+  showResetConfirm.value = false
 }
 </script>
 
 <template>
-  <div
-    v-if="open"
-    class="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50"
-    @click.self="close"
-  >
-    <div class="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 space-y-6 max-h-[90vh] overflow-y-auto" style="background-color: hsl(var(--background)); color: hsl(var(--foreground))">
-      <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-bold">Settings</h2>
-        <button
-          @click="close"
-          class="text-2xl rounded-lg px-2 transition-colors hover:opacity-80"
-        >
-          ×
-        </button>
-      </div>
-
-      <div class="space-y-4">
+  <Modal :open="open" title="Tetapan" @update:open="$emit('update:open', $event)">
+    <div class="space-y-4">
         <!-- Vibration -->
         <div class="flex items-center justify-between">
-          <label for="vibration" class="font-medium">Vibration feedback</label>
+          <label for="vibration" class="font-medium">Getar maklum balas</label>
           <input
             id="vibration"
             type="checkbox"
@@ -55,7 +47,7 @@ function close() {
 
         <!-- Sound -->
         <div class="flex items-center justify-between">
-          <label for="sound" class="font-medium">Sound effects</label>
+          <label for="sound" class="font-medium">Kesan bunyi</label>
           <input
             id="sound"
             type="checkbox"
@@ -67,7 +59,7 @@ function close() {
 
         <!-- Screen Awake -->
         <div class="flex items-center justify-between">
-          <label for="wake" class="font-medium">Keep screen awake</label>
+          <label for="wake" class="font-medium">Kekalkan skrin aktif</label>
           <input
             id="wake"
             type="checkbox"
@@ -80,7 +72,7 @@ function close() {
         <div class="pt-4" style="border-top: 1px solid hsl(var(--border))">
           <!-- Reminders -->
           <div class="flex items-center justify-between mb-3">
-            <label for="reminder" class="font-medium">Periodic reminders</label>
+            <label for="reminder" class="font-medium">Peringatan berkala</label>
             <input
               id="reminder"
               type="checkbox"
@@ -92,7 +84,7 @@ function close() {
 
           <div v-if="settingsStore.settings.reminderEnabled" class="space-y-2 pl-4">
             <label for="interval" class="text-sm" style="color: hsl(var(--muted-foreground))">
-              Reminder interval (minutes)
+              Jarak peringatan (minit)
             </label>
             <input
               id="interval"
@@ -112,10 +104,30 @@ function close() {
             class="mt-3 w-full px-4 py-2 rounded-lg transition-colors"
             style="background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground))"
           >
-            Enable Notifications
+            Benarkan Pemberitahuan
+          </button>
+        </div>
+
+        <!-- Reset Streak -->
+        <div class="pt-4" style="border-top: 1px solid hsl(var(--border))">
+          <button
+            @click="showResetConfirm = true"
+            class="w-full px-4 py-2 rounded-lg transition-colors border border-border hover:bg-destructive/10 hover:border-destructive"
+            style="color: hsl(var(--destructive))"
+          >
+            Tetap Semula Rekod Berturut
           </button>
         </div>
       </div>
-    </div>
-  </div>
+
+    <ConfirmModal
+      :open="showResetConfirm"
+      title="Tetap Semula Rekod Berturut?"
+      message="Adakah anda pasti ingin menetapkan semula rekod berturut anda? Tindakan ini tidak boleh dibatalkan."
+      confirm-text="Tetap Semula"
+      :destructive="true"
+      @update:open="showResetConfirm = $event"
+      @confirm="handleResetStreak"
+    />
+  </Modal>
 </template>

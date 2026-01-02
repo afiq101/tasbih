@@ -1,30 +1,61 @@
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useTasbihStore } from '@/stores/tasbih'
-import { Plus } from 'lucide-vue-next'
+import { Plus, Pencil } from 'lucide-vue-next'
+import TasbihFormModal from './TasbihFormModal.vue'
+import ConfirmModal from './ConfirmModal.vue'
 
 const tasbihStore = useTasbihStore()
 
 const tasbihs = computed(() => tasbihStore.tasbihsList)
+
+const showModal = ref(false)
+const modalMode = ref('create')
+const editingTasbih = ref(null)
+
+const showDeleteConfirm = ref(false)
+const deletingTasbihId = ref(null)
 
 function handleSelect(id) {
   tasbihStore.setActiveTasbih(id)
 }
 
 function handleCreate() {
-  const name = prompt('Enter tasbih name:', 'SubhanAllah')
-  if (name && name.trim()) {
-    const target = prompt('Enter target count:', '33')
-    if (target && !isNaN(target)) {
-      tasbihStore.createTasbih(name.trim(), parseInt(target))
-    }
-  }
+  modalMode.value = 'create'
+  editingTasbih.value = null
+  showModal.value = true
+}
+
+function handleEdit(tasbih, event) {
+  event.stopPropagation()
+  modalMode.value = 'edit'
+  editingTasbih.value = tasbih
+  showModal.value = true
 }
 
 function handleDelete(id, event) {
   event.stopPropagation()
-  if (confirm('Delete this tasbih?')) {
-    tasbihStore.deleteTasbih(id)
+  deletingTasbihId.value = id
+  showDeleteConfirm.value = true
+}
+
+function confirmDelete() {
+  if (deletingTasbihId.value) {
+    tasbihStore.deleteTasbih(deletingTasbihId.value)
+    deletingTasbihId.value = null
+  }
+}
+
+function handleFormSubmit(data) {
+  if (modalMode.value === 'create') {
+    tasbihStore.createTasbih(data.name, data.targetCount, data.arabic, data.transliteration)
+  } else if (modalMode.value === 'edit' && editingTasbih.value) {
+    tasbihStore.updateTasbih(editingTasbih.value.id, {
+      name: data.name,
+      targetCount: data.targetCount,
+      arabic: data.arabic,
+      transliteration: data.transliteration
+    })
   }
 }
 </script>
@@ -32,11 +63,11 @@ function handleDelete(id, event) {
 <template>
   <div v-if="tasbihs.length > 0" class="space-y-3">
     <div class="flex items-center justify-between">
-      <h3 class="text-sm font-medium text-muted-foreground">Your Tasbihs</h3>
+      <h3 class="text-sm font-medium text-muted-foreground">Tasbih Anda</h3>
       <button
         @click="handleCreate"
         class="p-1.5 rounded-lg hover:bg-secondary transition-colors"
-        aria-label="Add new tasbih"
+        aria-label="Tambah tasbih baharu"
       >
         <Plus :size="20" />
       </button>
@@ -57,13 +88,22 @@ function handleDelete(id, event) {
             {{ tasbih.currentCount }} / {{ tasbih.targetCount }}
           </div>
         </div>
-        <button
-          v-if="tasbihs.length > 1"
-          @click="(e) => handleDelete(tasbih.id, e)"
-          class="absolute top-1 right-1 px-1.5 py-0.5 text-xs rounded hover:bg-destructive hover:text-destructive-foreground"
-        >
-          ×
-        </button>
+        <div class="absolute top-1 right-1 flex gap-1">
+          <button
+            @click="(e) => handleEdit(tasbih, e)"
+            class="p-1 rounded hover:bg-secondary transition-colors"
+            aria-label="Kemaskini"
+          >
+            <Pencil :size="12" />
+          </button>
+          <button
+            v-if="tasbihs.length > 1"
+            @click="(e) => handleDelete(tasbih.id, e)"
+            class="px-1.5 py-0.5 text-xs rounded hover:bg-destructive hover:text-destructive-foreground"
+          >
+            ×
+          </button>
+        </div>
       </button>
     </div>
   </div>
@@ -72,7 +112,24 @@ function handleDelete(id, event) {
       @click="handleCreate"
       class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
     >
-      Create Your First Tasbih
+      Cipta Tasbih Pertama Anda
     </button>
   </div>
+
+  <TasbihFormModal
+    v-model:open="showModal"
+    :mode="modalMode"
+    :tasbih="editingTasbih"
+    @submit="handleFormSubmit"
+  />
+
+  <ConfirmModal
+    v-model:open="showDeleteConfirm"
+    title="Padam Tasbih"
+    message="Adakah anda pasti ingin memadam tasbih ini? Tindakan ini tidak boleh dibatalkan."
+    confirm-text="Padam"
+    cancel-text="Batal"
+    destructive
+    @confirm="confirmDelete"
+  />
 </template>

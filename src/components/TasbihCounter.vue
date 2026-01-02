@@ -7,6 +7,7 @@ import { useNotificationsStore } from '@/stores/notifications'
 import CounterDisplay from './CounterDisplay.vue'
 import TargetProgress from './TargetProgress.vue'
 import CounterButton from './CounterButton.vue'
+import ArabicDisplay from './ArabicDisplay.vue'
 
 const tasbihStore = useTasbihStore()
 const notificationsStore = useNotificationsStore()
@@ -50,6 +51,10 @@ function handleIncrement() {
 
 <template>
   <div v-if="activeTasbih" class="space-y-4">
+    <ArabicDisplay
+      :arabic="activeTasbih.arabic"
+      :transliteration="activeTasbih.transliteration"
+    />
     <TargetProgress :progress="progress" :reached="isTargetReached" />
     <div class="flex justify-center">
       <CounterButton @click="handleIncrement" :reached="isTargetReached" />

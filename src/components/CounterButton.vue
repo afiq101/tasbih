@@ -17,7 +17,7 @@ defineEmits(['click'])
       color: reached ? 'white' : 'hsl(var(--primary-foreground))'
     }"
   >
-    {{ reached ? 'Continue' : 'Tap to Count' }}
+    {{ reached ? 'Teruskan' : 'Tekan untuk Kira' }}
   </button>
 </template>
 
