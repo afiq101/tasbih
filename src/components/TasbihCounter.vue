@@ -49,15 +49,15 @@ function handleIncrement() {
 </script>
 
 <template>
-  <div v-if="activeTasbih" class="space-y-6">
+  <div v-if="activeTasbih" class="space-y-4">
+    <TargetProgress :progress="progress" :reached="isTargetReached" />
+    <div class="flex justify-center">
+      <CounterButton @click="handleIncrement" :reached="isTargetReached" />
+    </div>
     <CounterDisplay
       :count="activeTasbih.currentCount"
       :target="activeTasbih.targetCount"
       :name="activeTasbih.name"
     />
-    <TargetProgress :progress="progress" :reached="isTargetReached" />
-    <div class="flex justify-center">
-      <CounterButton @click="handleIncrement" :reached="isTargetReached" />
-    </div>
   </div>
 </template>

@@ -50,23 +50,32 @@ export const useTasbihStore = defineStore('tasbih', () => {
   }
 
   function updateTasbih(id, updates) {
-    const tasbih = tasbihs.value.find(t => t.id === id)
-    if (tasbih) {
-      Object.assign(tasbih, updates, { updatedAt: Date.now() })
+    const index = tasbihs.value.findIndex(t => t.id === id)
+    if (index !== -1) {
+      tasbihs.value[index] = {
+        ...tasbihs.value[index],
+        ...updates,
+        updatedAt: Date.now()
+      }
     }
   }
 
   function increment(id) {
-    const tasbih = tasbihs.value.find(t => t.id === id)
-    if (tasbih) {
-      tasbih.currentCount++
-      tasbih.updatedAt = Date.now()
+    const index = tasbihs.value.findIndex(t => t.id === id)
+    if (index !== -1) {
+      tasbihs.value[index] = {
+        ...tasbihs.value[index],
+        currentCount: tasbihs.value[index].currentCount + 1,
+        updatedAt: Date.now()
+      }
     }
   }
 
   function reset(id) {
-    const tasbih = tasbihs.value.find(t => t.id === id)
-    if (tasbih && tasbih.currentCount > 0) {
+    const index = tasbihs.value.findIndex(t => t.id === id)
+    if (index !== -1 && tasbihs.value[index].currentCount > 0) {
+      const tasbih = tasbihs.value[index]
+
       // Save to history
       const session = {
         id: Date.now().toString(),
@@ -75,16 +84,21 @@ export const useTasbihStore = defineStore('tasbih', () => {
         completedAt: Date.now(),
         completed: tasbih.currentCount >= tasbih.targetCount
       }
-      tasbih.history.unshift(session)
+
+      const newHistory = [session, ...tasbih.history]
 
       // Limit history to last 100 sessions
-      if (tasbih.history.length > 100) {
-        tasbih.history = tasbih.history.slice(0, 100)
+      if (newHistory.length > 100) {
+        newHistory.length = 100
       }
 
       // Reset count
-      tasbih.currentCount = 0
-      tasbih.updatedAt = Date.now()
+      tasbihs.value[index] = {
+        ...tasbih,
+        currentCount: 0,
+        history: newHistory,
+        updatedAt: Date.now()
+      }
     }
   }
 
@@ -93,10 +107,13 @@ export const useTasbihStore = defineStore('tasbih', () => {
   }
 
   function clearHistory(id) {
-    const tasbih = tasbihs.value.find(t => t.id === id)
-    if (tasbih) {
-      tasbih.history = []
-      tasbih.updatedAt = Date.now()
+    const index = tasbihs.value.findIndex(t => t.id === id)
+    if (index !== -1) {
+      tasbihs.value[index] = {
+        ...tasbihs.value[index],
+        history: [],
+        updatedAt: Date.now()
+      }
     }
   }
 
