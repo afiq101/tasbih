@@ -13,7 +13,7 @@ function formatDate(timestamp) {
 }
 
 function handleClearHistory() {
-  if (confirm('Clear all history? This cannot be undone.')) {
+  if (confirm('Kosongkan semua sejarah? Tindakan ini tidak boleh dibatalkan.')) {
     tasbihStore.clearHistory(tasbihStore.activeTasbih.id)
   }
 }
@@ -26,9 +26,9 @@ function handleClearHistory() {
       class="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors"
     >
       <div class="flex items-center gap-3">
-        <span class="font-semibold">History</span>
+        <span class="font-semibold">Sejarah</span>
         <span class="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full">
-          {{ history.length }} sessions
+          {{ history.length }} sesi
         </span>
       </div>
       <ChevronDown v-if="!expanded" :size="20" />
@@ -37,7 +37,7 @@ function handleClearHistory() {
 
     <div v-if="expanded" class="border-t">
       <div v-if="history.length === 0" class="text-center text-muted-foreground py-8">
-        No history yet
+        Tiada sejarah lagi
       </div>
       <div v-else>
         <div class="max-h-64 overflow-y-auto">
@@ -47,7 +47,7 @@ function handleClearHistory() {
             class="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-secondary/50"
           >
             <div>
-              <div class="font-semibold">{{ session.count }} counts</div>
+              <div class="font-semibold">{{ session.count }} kiraan</div>
               <div class="text-sm text-muted-foreground">
                 {{ formatDate(session.completedAt) }}
               </div>
@@ -58,7 +58,7 @@ function handleClearHistory() {
                 ? 'bg-green-500/10 text-green-600'
                 : 'bg-secondary text-secondary-foreground'"
             >
-              {{ session.completed ? 'Completed' : 'Partial' }}
+              {{ session.completed ? 'Selesai' : 'Separa' }}
             </span>
           </div>
         </div>
@@ -69,7 +69,7 @@ function handleClearHistory() {
             style="background-color: hsl(var(--destructive)); color: hsl(var(--destructive-foreground))"
           >
             <Trash2 :size="16" />
-            Clear All History
+            Kosongkan Semua Sejarah
           </button>
         </div>
       </div>
